@@ -28,7 +28,7 @@ public class CreateThread implements RequestHandler<Map<String, Object>, ApiGate
             JsonNode body = new ObjectMapper().readTree((String) input.get("body"));
             Message msg = new Message();
             msg.setComment(body.get("comment").asText());
-            msg.setComment(body.get("owner").asText());
+            msg.setSender(body.get("owner").asText());
             // create the Product object for post
             ArrayList<Message> list = new ArrayList<>();
             list.add(msg);

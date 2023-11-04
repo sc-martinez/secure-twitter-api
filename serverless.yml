@@ -32,6 +32,9 @@ provider:
 package:
   artifact: 'target/${self:service}-${self:provider.stage}.jar'
 
+plugins:
+  - serverless-auto-swagger
+
 functions:
   listUsers:
     handler: com.serverless.services.ListUsers
