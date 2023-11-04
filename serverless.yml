@@ -1,0 +1,118 @@
+
+service: twitter-api
+frameworkVersion: '3'
+
+custom:
+  usersTableName: 'java-users-${self:provider.stage}'
+  threadsTableName: 'java-threads-${self:provider.stage}'
+
+provider:
+  name: aws
+  runtime: java8
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  environment:
+    USERS_TABLE_NAME: ${self:custom.usersTableName}
+    THREADS_TABLE_NAME: ${self:custom.threadsTableName}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+      Resource:
+          - { "Fn::GetAtt": [ "UsersDynamoDBTable", "Arn" ] }
+          - { "Fn::GetAtt": [ "ThreadsDynamoDBTable", "Arn" ] }
+
+
+package:
+  artifact: 'target/${self:service}-${self:provider.stage}.jar'
+
+functions:
+  listUsers:
+    handler: com.serverless.services.ListUsers
+    timeout: 300
+    events:
+      - http:
+          path: /users
+          method: get
+  getUser:
+    handler: com.serverless.services.GetUser
+    timeout: 300
+    events:
+      - http:
+          path: /users/{id}
+          method: get
+
+  registerUser:
+    handler: com.serverless.services.RegisterUser
+    timeout: 300
+    events:
+      - http:
+          path: /users
+          method: post
+
+  deleteUser:
+    handler: com.serverless.services.DeleteUser
+    timeout: 300
+    events:
+      - http:
+          path: /users/{id}
+          method: delete
+
+  createThread:
+    handler: com.serverless.services.CreateThread
+    timeout: 300
+    events:
+      - http:
+          path: /thread/
+          method: post
+
+  postComment:
+    handler: com.serverless.services.CommentThread
+    timeout: 300
+    events:
+      - http:
+          path: /thread/comment/{id}
+          method: post
+
+resources:
+  Resources:
+    UsersDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.usersTableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: name
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: name
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    ThreadsDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.threadsTableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: owner
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+          - AttributeName: owner
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
