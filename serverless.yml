@@ -5,6 +5,7 @@ frameworkVersion: '3'
 custom:
   usersTableName: 'java-users-${self:provider.stage}'
   threadsTableName: 'java-threads-${self:provider.stage}'
+  authorizerARN: 'arn:aws:cognito-idp:us-east-1:771784633686:userpool/us-east-1_B9lNLt23I'
 
 provider:
   name: aws
@@ -43,6 +44,9 @@ functions:
       - http:
           path: /users
           method: get
+          cors: true
+          authorizer:
+              arn: ${self:custom.authorizerARN}
   getUser:
     handler: com.serverless.services.GetUser
     timeout: 300
@@ -50,6 +54,9 @@ functions:
       - http:
           path: /users/{id}
           method: get
+          cors: true
+          authorizer:
+            arn: ${self:custom.authorizerARN}
 
   registerUser:
     handler: com.serverless.services.RegisterUser
@@ -58,6 +65,9 @@ functions:
       - http:
           path: /users
           method: post
+          cors: true
+          authorizer:
+            arn: ${self:custom.authorizerARN}
 
   deleteUser:
     handler: com.serverless.services.DeleteUser
@@ -66,6 +76,9 @@ functions:
       - http:
           path: /users/{id}
           method: delete
+          cors: true
+          authorizer:
+            arn: ${self:custom.authorizerARN}
 
   createThread:
     handler: com.serverless.services.CreateThread
@@ -74,6 +87,20 @@ functions:
       - http:
           path: /thread/
           method: post
+          cors: true
+          authorizer:
+            arn: ${self:custom.authorizerARN}
+
+  listThreads:
+    handler: com.serverless.services.ListThreads
+    timeout: 300
+    events:
+      - http:
+          path: /thread
+          method: get
+          cors: true
+          authorizer:
+            arn: ${self:custom.authorizerARN}
 
   postComment:
     handler: com.serverless.services.CommentThread
@@ -82,6 +109,9 @@ functions:
       - http:
           path: /thread/comment/{id}
           method: post
+          cors: true
+          authorizer:
+            arn: ${self:custom.authorizerARN}
 
 resources:
   Resources:

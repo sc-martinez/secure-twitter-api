@@ -1,142 +1,47 @@
-# ARCHITECTURE OF MASSIVELY DISTRIBUTED APPLICATIONS
+# SECURITY HOMEWORK
 ## Resumen
-Este repositorio contiene el resultado de la aplicación del mnodelo arquitecónico por microservicios. La solución pretende funcionar cómo un prototipo mínimo para la solución de intercambio de mensajes e hilos de Twitter. 
+Este repositorio contiene el detalle del desarrollo del workshop AWS Serverless Application Model + Una extensión a la implementación del ejercicio "ARCHITECTURE OF MASSIVELY DISTRIBUTED APPLICATIONS" añadiendo capacidades de Seguridad, aplicando el principio de mediación completa (Autorización, Autenticación e integridad).
 
-## Detalles técnicos del proyecto
-- [Java 8](https://www.oracle.com/co/java/technologies/javase/javase8-archive-downloads.html)
-- [Serverless Framework](https://www.serverless.com/)
-- [Maven](https://maven.apache.org/)
-- [AWS API Gateway](https://aws.amazon.com/api-gateway/)
-- [Dynamo DB](https://aws.amazon.com/pm/dynamodb/?gclid=EAIaIQobChMIw_uw-eypggMVSJCGCh0QdgbnEAAYASAAEgKB4vD_BwE&trk=25284480-59e1-4326-ba66-8ac95215e983&sc_channel=ps&ef_id=EAIaIQobChMIw_uw-eypggMVSJCGCh0QdgbnEAAYASAAEgKB4vD_BwE:G:s&s_kwcid=AL!4422!3!648041763511!e!!g!!dynamodb!19677234651!149715849327)
-- [npm](https://www.npmjs.com/)
+### Desarrollo de Workshop AWS Serverless Application Model
 
-## Features
-- CRUD de usuarios
-- CRUD de hilos de conversación
-- Abstracción de conversación / Post de comentarios
-
-
-## Vista de Arquitectura
-![ARQ.JPG](docs/awsNew.drawio.png)
-
-En esta vista se exponen los componentes principales de la solución. 
-- API Gateway: Orquestador de peticiones HTTP
-- Lambdas : Servicios independientes y desacoplados que componen la solución
-- Fuentes de Datos : Usuarios y Conversaciones (Bases de datos de Dynamo DB)
-
-## Catálogo de servicios 💬
-
-| Recurso | Operación | URL                  | Descripción                                                     |
-|---------|-----------|----------------------|-----------------------------------------------------------------|
-| Users   | GET       | /users/              | Lista los usuarios registrados de la solución                   | 
-| Users   | POST      | /users/              | Registra un nuevo usuario en la solución                        | 
-| Users   | GET       | /users/{id}          | Obtiene el usuario con id = {id} registrado en la solución      | 
-| Users   | DELETE    | /users/{id}          | Elimina el usuario con {id} de la solución                      | 
-| Thread  | POST      | /thread/             | Crea un nuevo hilo de discusión                                 | 
-| Thread  | POST      | /thread/comment/{id} | Añade un comentario en la última posición del hilo de discusión | 
+ - La solución de Front (GUI) para el ejemplo de renta de unicornios se realizo en el repositorio [wildrydes-site](https://github.com/sc-martinez/wildrydes-site).
+ - Con configuración final en config.js
+ ```javascript
+    window._config = {
+        cognito: {
+            userPoolId: 'us-east-1_E1PKYvwVf', // e.g. us-east-2_uXboG5pAb
+            userPoolClientId: '5qqjr8ki6di111cpai8ndorqgq', // e.g. 25ddkmj4v6hfsfvruhpfi7n4hv
+            region: 'us-east-1' // e.g. us-east-2
+        },
+        api: {
+            invokeUrl: 'https://qn8syadqmc.execute-api.us-east-1.amazonaws.com/prod' // e.g. https://rc7nyt4tql.execute-api.us-west-2.amazonaws.com/prod',
+        }
+    };
+ ```
+ - Se crea el sitio basado en la GUI con el repositorio github
+    ![amplify](docs/AmplifySite.PNG)
+    ![amplify](docs/amplifyDeployed.PNG)
+ - Se registra un nuevo usuario en la solución
+   ![amplify](docs/newUser.PNG)
+ - La aplicación se autentica contra cognito y genera el respectivo token JWT
+   ![amplify](docs/authToken.PNG)
+ - La solución usa el recurso definido por lambda en el workshop para solicitar un "unicornio" en la ubicación seleccionada, se puede observar en la evidencia que la solicitud se hace al API-Gateway con el encabezado de autorización correspondiente al token generado en el paso anterior.
+   ![amplify](docs/sendRequestWithAuth.PNG)
 
 
-# Representación de los recursos
-
-### Usuarios
-```java
-public class User {
-    private String id; // ID de ddynamo auto-generado
-    private String name; // Nombre
-    private String mail; // El correo del usuario
-    private String image; // La imagen de perfil (S3)
-}
-```
-
-### Hilos de discusión
-```java
-public class Thread {
-
-    private String id;
-    private String owner;
-    private Date created;
-    private List<Message> messages;
-}
-```
-## Evidencias
-
-### Vista general de los recursos
-![resources](docs/Recursos.PNG)
-
-### Crear Hilo de discusión 
-![Thread](docs/newThread.PNG)
-
-
-### Añadir Comentario
-![ThreadComm](docs/AddComment.PNG)
-
-### Registrar Usuario
-![AddUser](docs/newUser.PNG)
-
-### Consultar Usuarios
-![getUsers](docs/getUsers.PNG)
-
-### Eliminar Usuario
-![DeleteUsers](docs/DeleteUser.PNG)
-
-## Instalación
- 
-- Debe contar con NPM (Node Package Manager) instalado y configuado en su entorno local. 
-- Instalar el framework de Serverless
-```bash 
-npm install -g serverless
-```
-- Hacer el build de la solución utilizando el siguiente comando.
-```bash 
-mvn clean install
-```
-- Invocar el comando 'Serverless', configurar en caso de ser necesario las credenciales de AWS y permisos de IAM para automatizar el despliegue de componentes definido en el archivo [serverless.yml](serverless.yml)
-
-    - Guía de configuración : [Guia](https://www.serverless.com/framework/docs/tutorial)
-
-<details><summary>Ver detalle</summary>
-<p>
-
-#### Encontrado en Serverless.yml
-
-```yaml 
-service: twitter-api
-frameworkVersion: '3'
-
+### Creación de aplicación segura Facebook/Like thread con  AWS Serverless Application Model
+- Se toma cómo base la solución del repositorio [twitterAPIJava](https://github.com/sc-martinez/twitterJavaAPI) 
+- Se añaden los autorizadores de cognito con la notación del framework de serverless en el archivo serverless.yml en cada uno de los recursos del API gateway
+```yml
 custom:
   usersTableName: 'java-users-${self:provider.stage}'
   threadsTableName: 'java-threads-${self:provider.stage}'
+  authorizerARN: 'arn:aws:cognito-idp:us-east-1:771784633686:userpool/us-east-1_B9lNLt23I'
+```
+Notar que el parametro authorizerARN corresponde al arn del grupo de usuarios de cognito
+![cognito](docs/cognito2.PNG)
 
-provider:
-  name: aws
-  runtime: java8
-  stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-east-1'}
-  environment:
-    USERS_TABLE_NAME: ${self:custom.usersTableName}
-    THREADS_TABLE_NAME: ${self:custom.threadsTableName}
-
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource:
-        - { "Fn::GetAtt": [ "UsersDynamoDBTable", "Arn" ] }
-        - { "Fn::GetAtt": [ "ThreadsDynamoDBTable", "Arn" ] }
-
-
-package:
-  artifact: 'target/${self:service}-${self:provider.stage}.jar'
-
-plugins:
-  - serverless-auto-swagger
-
-functions:
+```yml
   listUsers:
     handler: com.serverless.services.ListUsers
     timeout: 300
@@ -144,87 +49,34 @@ functions:
       - http:
           path: /users
           method: get
-  getUser:
-    handler: com.serverless.services.GetUser
-    timeout: 300
-    events:
-      - http:
-          path: /users/{id}
-          method: get
-
-  registerUser:
-    handler: com.serverless.services.RegisterUser
-    timeout: 300
-    events:
-      - http:
-          path: /users
-          method: post
-
-  deleteUser:
-    handler: com.serverless.services.DeleteUser
-    timeout: 300
-    events:
-      - http:
-          path: /users/{id}
-          method: delete
-
-  createThread:
-    handler: com.serverless.services.CreateThread
-    timeout: 300
-    events:
-      - http:
-          path: /thread/
-          method: post
-
-  postComment:
-    handler: com.serverless.services.CommentThread
-    timeout: 300
-    events:
-      - http:
-          path: /thread/comment/{id}
-          method: post
-
-resources:
-  Resources:
-    UsersDynamoDBTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:custom.usersTableName}
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-          - AttributeName: name
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-          - AttributeName: name
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-    ThreadsDynamoDBTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:custom.threadsTableName}
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-          - AttributeName: owner
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-          - AttributeName: owner
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-
+          cors: true
+          authorizer:
+              arn: ${self:custom.authorizerARN}
 ```
-</details></p>
-
-- Invocar el siguiente comando
+- Se añaden los atributos de dominio cruzado CORS en la respuesta de las solicitudes para cada handler
+```java
+public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context){
+        Map<String, String> headers=new HashMap<>();
+        headers.put("X-Powered-By","AWS Lambda & Serverless");
+        headers.put("Access-Control-Allow-Origin","*");
+        headers.put("Access-Control-Allow-Credentials","true");
+        .....
+}
+```
+- Se despliega la solución con los siguientes comandos
 ```bash
+mvn clean install
 serverless deploy
 ```
+- Una vez desplegado se toman las Urls del API Gateway para definir el punto de entrada para la interfaz gráfica GUI.
+  ![endpoint](docs/endpoint.PNG)
+- El respositorio para la solución de front está en [secure-twitter-front](https://github.com/sc-martinez/secure-twitter-front), la cuál es una refactorización de la aplicación del workshop anterior, enfocada al paso de mensajes. 
+- Se registran dos usuarios con la aplicación en el servicio de cognito 
+![users](docs/users.PNG)
+- Se realizan las pruebas de envios de mensajes, se puede evidenciar el intercambio de mensajes entre los componentes de aplicación por medio de autorización por Token
+  ![auth](docs/auth.PNG)
+- Demo de interacción Login y mensajes
+   ![demo1](docs/Recording%202023-11-14%20at%2023.48.55.gif)
+
+- Demo de logout y actualización de número de usuarios
+   ![demo2](docs/Recording%202023-11-14%20at%2023.48.55.gif)

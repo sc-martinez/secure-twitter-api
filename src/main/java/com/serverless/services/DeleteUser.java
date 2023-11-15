@@ -8,6 +8,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.serverless.domain.User;
 import org.apache.log4j.Logger;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.serverless.http.ApiGatewayResponse;
@@ -19,7 +20,10 @@ public class DeleteUser implements RequestHandler<Map<String, Object>, ApiGatewa
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
-
+        Map<String, String> headers = new HashMap<>();
+        headers.put("X-Powered-By", "AWS Lambda & Serverless");
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Credentials", "true");
         try {
             Map<String,String> pathParameters =  (Map<String,String>)input.get("pathParameters");
             String id = pathParameters.get("id");
@@ -29,13 +33,13 @@ public class DeleteUser implements RequestHandler<Map<String, Object>, ApiGatewa
             if (success) {
                 return ApiGatewayResponse.builder()
                         .setStatusCode(204)
-                        .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                        .setHeaders(headers)
                         .build();
             } else {
                 return ApiGatewayResponse.builder()
                         .setStatusCode(404)
                         .setObjectBody("Product with id: '" + id + "' not found.")
-                        .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                        .setHeaders(headers)
                         .build();
             }
         } catch (Exception ex) {
@@ -46,7 +50,7 @@ public class DeleteUser implements RequestHandler<Map<String, Object>, ApiGatewa
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)
-                    .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                    .setHeaders(headers)
                     .build();
         }
     }

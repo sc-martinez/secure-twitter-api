@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serverless.domain.User;
 import org.apache.log4j.Logger;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.serverless.http.ApiGatewayResponse;
@@ -20,14 +21,15 @@ public class RegisterUser implements RequestHandler<Map<String, Object>, ApiGate
 
     @Override
     public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
-
+        Map<String, String> headers = new HashMap<>();
+        headers.put("X-Powered-By", "AWS Lambda & Serverless");
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Credentials", "true");
         try {
             // get the 'body' from input
             JsonNode body = new ObjectMapper().readTree((String) input.get("body"));
 
-            // create the Product object for post
             User user = new User();
-            // product.setId(body.get("id").asText());
             user.setName(body.get("name").asText());
             user.setMail(body.get("mail").asText());
             user.setImage(body.get("image").asText());
@@ -37,7 +39,7 @@ public class RegisterUser implements RequestHandler<Map<String, Object>, ApiGate
             return ApiGatewayResponse.builder()
                     .setStatusCode(200)
                     .setObjectBody(user)
-                    .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                    .setHeaders(headers)
                     .build();
 
         } catch (Exception ex) {
@@ -48,7 +50,7 @@ public class RegisterUser implements RequestHandler<Map<String, Object>, ApiGate
             return ApiGatewayResponse.builder()
                     .setStatusCode(500)
                     .setObjectBody(responseBody)
-                    .setHeaders(Collections.singletonMap("X-Powered-By", "AWS Lambda & Serverless"))
+                    .setHeaders(headers)
                     .build();
         }
     }
