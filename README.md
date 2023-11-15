@@ -79,4 +79,4 @@ serverless deploy
    ![demo1](docs/Recording%202023-11-14%20at%2023.48.55.gif)
 
 - Demo de logout y actualización de número de usuarios
-   ![demo2](docs/Recording%202023-11-14%20at%2023.48.55.gif)
+   ![demo2](docs/Recording%202023-11-14%20at%2023.49.38.gif)
